@@ -46,10 +46,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (filteredQuotes.length === 0) {
             quoteDisplay.innerHTML = '<p>No quotes available for this category.</p>';
         } else {
-            filteredQuotes.forEach(quote => {
-                quoteDisplay.innerHTML += `<p>"${quote.text}" - <em>${quote.category}</em></p>`;
-            });
+            showRandomQuote(filteredQuotes);
         }
+    }
+
+    // Step 3: Show a random quote from the filtered list
+    function showRandomQuote(quoteList) {
+        const randomIndex = Math.floor(Math.random() * quoteList.length); // Generate random index
+        const randomQuote = quoteList[randomIndex];
+        quoteDisplay.innerHTML = `<p>"${randomQuote.text}" - <em>${randomQuote.category}</em></p>`;
     }
 
     // Function to add a new quote
@@ -86,4 +91,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const fileReader = new FileReader();
         fileReader.onload = function(e) {
             const importedQuotes = JSON.parse(e.target.result);
-            quotes.push(...importedQ
+            quotes.push(...importedQuotes);
+            saveQuotes(); // Save updated quotes to Local Storage
+            populateCategories(); // Update categories
+            filterQuotes(); // Re-apply filter
+            alert('Quotes imported successfully!');
+        };
+        fileReader.readAsText(event.target.files[0]);
+    }
+
+    // Attach event listeners
+    newQuoteBtn.addEventListener('click', addQuote);
+    document.getElementById('exportQuotesBtn').addEventListener('click', exportToJsonFile);
+
+    // Step 4: Initialize the app
+    populateCategories(); // Populate category dropdown on page load
+    filterQuotes(); // Apply filter when page loads
+});
