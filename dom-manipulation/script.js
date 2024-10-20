@@ -7,55 +7,73 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     const quoteDisplay = document.getElementById('quoteDisplay');
-    const newQuoteBtn = document.getElementById('newQuote');
-    
-    // Function to save quotes to Local Storage
+    const newQuoteBtn = document.getElementById('addQuoteBtn');
+    const categoryFilter = document.getElementById('categoryFilter');
+
+    // Step 2: Function to save quotes to Local Storage
     function saveQuotes() {
         localStorage.setItem('quotes', JSON.stringify(quotes));
     }
 
-    // Function to show a random quote
-    function showRandomQuote() {
-        const randomIndex = Math.floor(Math.random() * quotes.length);
-        const randomQuote = quotes[randomIndex];
-        quoteDisplay.innerHTML = `<p>"${randomQuote.text}" - <em>${randomQuote.category}</em></p>`;
-        sessionStorage.setItem('lastViewedQuote', JSON.stringify(randomQuote)); // Optional: Save the last viewed quote in session storage
+    // Function to populate categories dynamically
+    function populateCategories() {
+        const categories = [...new Set(quotes.map(quote => quote.category))]; // Get unique categories
+        categoryFilter.innerHTML = '<option value="all">All Categories</option>'; // Reset dropdown
+
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categoryFilter.appendChild(option);
+        });
+
+        // Remember the last selected filter
+        const lastSelectedCategory = localStorage.getItem('selectedCategory');
+        if (lastSelectedCategory) {
+            categoryFilter.value = lastSelectedCategory;
+            filterQuotes(); // Apply the filter based on saved category
+        }
+    }
+
+    // Function to show filtered quotes based on selected category
+    function filterQuotes() {
+        const selectedCategory = categoryFilter.value;
+        localStorage.setItem('selectedCategory', selectedCategory); // Save the filter selection
+        quoteDisplay.innerHTML = ''; // Clear current display
+
+        const filteredQuotes = selectedCategory === 'all' ? quotes : quotes.filter(quote => quote.category === selectedCategory);
+
+        if (filteredQuotes.length === 0) {
+            quoteDisplay.innerHTML = '<p>No quotes available for this category.</p>';
+        } else {
+            filteredQuotes.forEach(quote => {
+                quoteDisplay.innerHTML += `<p>"${quote.text}" - <em>${quote.category}</em></p>`;
+            });
+        }
     }
 
     // Function to add a new quote
-    function addQuote(quoteText, quoteCategory) {
-        if (quoteText === "" || quoteCategory === "") {
+    function addQuote() {
+        const newQuoteText = document.getElementById('newQuoteText').value.trim();
+        const newQuoteCategory = document.getElementById('newQuoteCategory').value.trim();
+
+        if (newQuoteText === "" || newQuoteCategory === "") {
             alert("Please enter both a quote and a category.");
             return;
         }
-        quotes.push({ text: quoteText, category: quoteCategory });
+
+        quotes.push({ text: newQuoteText, category: newQuoteCategory });
         saveQuotes(); // Save updated quotes to Local Storage
-        showRandomQuote(); // Optionally display the newly added quote
+        populateCategories(); // Update the category dropdown
+        filterQuotes(); // Re-apply filter with the new quote added
     }
 
-    // Create form for adding new quotes dynamically
-    function createAddQuoteForm() {
-        const addQuoteBtn = document.getElementById('addQuoteBtn');
-        
-        addQuoteBtn.addEventListener('click', function() {
-            const newQuoteText = document.getElementById('newQuoteText').value.trim();
-            const newQuoteCategory = document.getElementById('newQuoteCategory').value.trim();
-            addQuote(newQuoteText, newQuoteCategory);
-        });
-    }
-
-    // Load the last viewed quote from session storage (Optional)
-    const lastViewedQuote = JSON.parse(sessionStorage.getItem('lastViewedQuote'));
-    if (lastViewedQuote) {
-        quoteDisplay.innerHTML = `<p>"${lastViewedQuote.text}" - <em>${lastViewedQuote.category}</em></p>`;
-    }
-
-    // Export quotes to a JSON file
+    // Function to export quotes as a JSON file
     function exportToJsonFile() {
         const dataStr = JSON.stringify(quotes);
         const blob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        
+
         const exportBtn = document.createElement('a');
         exportBtn.href = url;
         exportBtn.download = 'quotes.json';
@@ -63,23 +81,9 @@ document.addEventListener('DOMContentLoaded', function() {
         URL.revokeObjectURL(url);
     }
 
-    // Import quotes from a JSON file
+    // Function to import quotes from a JSON file
     function importFromJsonFile(event) {
         const fileReader = new FileReader();
         fileReader.onload = function(e) {
             const importedQuotes = JSON.parse(e.target.result);
-            quotes.push(...importedQuotes);
-            saveQuotes(); // Save updated quotes to Local Storage
-            alert('Quotes imported successfully!');
-        };
-        fileReader.readAsText(event.target.files[0]);
-    }
-
-    // Attach event listeners
-    newQuoteBtn.addEventListener('click', showRandomQuote);
-    document.getElementById('exportQuotesBtn').addEventListener('click', exportToJsonFile);
-    document.getElementById('importFile').addEventListener('change', importFromJsonFile);
-
-    // Initialize form creation and load page
-    createAddQuoteForm();
-});
+            quotes.push(...importedQ
