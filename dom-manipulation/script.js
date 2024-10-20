@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             populateCategories();
             filterQuotes();
-            notifyUser('Data has been synced with the server.');
+            notifyUser('Quotes synced with server!'); // Updated message here
         } catch (error) {
             console.error('Error fetching server data:', error);
         }
