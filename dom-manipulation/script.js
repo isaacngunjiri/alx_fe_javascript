@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Fetch and merge quotes from the server
-    function fetchServerQuotes() {
+    function fetchQuotesFromServer() {
         fetch('https://jsonplaceholder.typicode.com/posts')
             .then(response => response.json())
             .then(serverQuotes => {
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
     newQuoteBtn.addEventListener('click', addQuote);
 
     // Periodically sync with the server
-    setInterval(fetchServerQuotes, 30000);
+    setInterval(fetchQuotesFromServer, 30000); // Sync every 30 seconds
 
     // Initial app setup
     populateCategories();
