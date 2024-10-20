@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Add a new quote
-    function addQuote() {
+    async function addQuote() {
         const newQuoteText = document.getElementById('newQuoteText').value.trim();
         const newQuoteCategory = document.getElementById('newQuoteCategory').value.trim();
 
@@ -63,24 +63,27 @@ document.addEventListener('DOMContentLoaded', function () {
         const newQuote = { text: newQuoteText, category: newQuoteCategory };
         quotes.push(newQuote);
         saveQuotes();
-        syncNewQuotesToServer(newQuote);
+        await syncNewQuotesToServer(newQuote);
         populateCategories();
         filterQuotes();
     }
 
     // Fetch and merge quotes from the server
-    function fetchQuotesFromServer() {
-        fetch('https://jsonplaceholder.typicode.com/posts')
-            .then(response => response.json())
-            .then(serverQuotes => {
-                const storedQuotes = JSON.parse(localStorage.getItem('quotes')) || [];
-                const mergedQuotes = mergeServerData(storedQuotes, serverQuotes);
-                localStorage.setItem('quotes', JSON.stringify(mergedQuotes));
-                populateCategories();
-                filterQuotes();
-                notifyUser('Data has been synced with the server.');
-            })
-            .catch(error => console.error('Error fetching server data:', error));
+    async function fetchQuotesFromServer() {
+        try {
+            const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+            const serverQuotes = await response.json();
+
+            const storedQuotes = JSON.parse(localStorage.getItem('quotes')) || [];
+            const mergedQuotes = mergeServerData(storedQuotes, serverQuotes);
+            localStorage.setItem('quotes', JSON.stringify(mergedQuotes));
+
+            populateCategories();
+            filterQuotes();
+            notifyUser('Data has been synced with the server.');
+        } catch (error) {
+            console.error('Error fetching server data:', error);
+        }
     }
 
     // Merge server data with local data
@@ -98,23 +101,25 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Sync new quotes to the server
-    function syncNewQuotesToServer(newQuote) {
-        fetch('https://jsonplaceholder.typicode.com/posts', {
-            method: 'POST',
-            body: JSON.stringify({
-                title: newQuote.text,
-                body: newQuote.category,
-                userId: 1
-            }),
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8'
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log('New quote synced to server:', data);
-            })
-            .catch(error => console.error('Error syncing quote:', error));
+    async function syncNewQuotesToServer(newQuote) {
+        try {
+            const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: newQuote.text,
+                    body: newQuote.category,
+                    userId: 1
+                }),
+                headers: {
+                    'Content-type': 'application/json; charset=UTF-8'
+                }
+            });
+
+            const data = await response.json();
+            console.log('New quote synced to server:', data);
+        } catch (error) {
+            console.error('Error syncing quote:', error);
+        }
     }
 
     // Notify the user about data syncs
