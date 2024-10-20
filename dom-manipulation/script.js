@@ -122,6 +122,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Sync quotes with server and handle conflicts
+    async function syncQuotes() {
+        await fetchQuotesFromServer();
+        // You could add more conflict resolution logic here if needed
+    }
+
     // Notify the user about data syncs
     function notifyUser(message) {
         const notification = document.createElement('div');
@@ -138,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
     newQuoteBtn.addEventListener('click', addQuote);
 
     // Periodically sync with the server
-    setInterval(fetchQuotesFromServer, 30000); // Sync every 30 seconds
+    setInterval(syncQuotes, 30000); // Sync every 30 seconds
 
     // Initial app setup
     populateCategories();
